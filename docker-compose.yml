@@ -1,27 +1,44 @@
-version: '3'
+version: '3.8'
+
 services:
   frontend:
-    image: feature-extraction/frontend:latest
+    build:
+      context: ./feature-extraction-frontend-main
+      args:
+        BUILD_ENV: production
     ports:
       - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend:8000
     depends_on:
       - backend
-      
+    restart: unless-stopped
+
   backend:
-    image: feature-extraction/backend:latest
-    environment:
-      - DB_HOST=postgres
+    build:
+      context: ./feature-extraction-backend-main
+    env_file:
+      - ./feature-extraction-backend-main/.env
     ports:
       - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/appdb
+      - SECRET_KEY=your-secret-key
     depends_on:
-      - postgres
-      
-  postgres:
+      - db
+    restart: unless-stopped
+
+  db:
     image: postgres:13
     environment:
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=appdb
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
     volumes:
-      - pgdata:/var/lib/postgresql/data
-      
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+
 volumes:
-  pgdata:
+  postgres_data:

@@ -1,0 +1,27 @@
+version: '3'
+services:
+  frontend:
+    image: feature-extraction/frontend:latest
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+      
+  backend:
+    image: feature-extraction/backend:latest
+    environment:
+      - DB_HOST=postgres
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      
+  postgres:
+    image: postgres:13
+    environment:
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      
+volumes:
+  pgdata:
