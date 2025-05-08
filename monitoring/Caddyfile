@@ -1,0 +1,22 @@
+cat << 'EOF' > monitoring/Caddyfile
+{
+    # Disable automatic HTTPS since we're using internal HTTP
+    auto_https off
+}
+
+# Main server block
+http://:8080 {
+    # Grafana reverse proxy
+    handle_path /grafana* {
+        reverse_proxy grafana:3000
+    }
+
+    # Prometheus reverse proxy
+    handle_path /prometheus* {
+        reverse_proxy prometheus:9090
+    }
+
+    # Default redirect to Grafana
+    redir / /grafana 301
+}
+EOF
